@@ -6,7 +6,7 @@ read_only_num() {
     local index=1
     while
         read -p "$prompt" return_value
-        if [[ !($return_value =~ ^[1-9]+$) ]]; then
+        if [[ !($return_value =~ ^[1-9][0-9]*$) ]]; then
             printf "Please enter a valid number"
             for (( i=1; i<=index; i++)) do
                 printf "(ㆆ_ㆆ)" #This is not a bug btw, this is my fruitless attempt at humor (ㆆ_ㆆ)
@@ -150,7 +150,7 @@ do true; done
 
 selected_locale="${avaliable_locales[(($locale_num - 1))]}"
 
-printf "Your selected locale was: %s" "$selected_locale"
+printf "Your selected locale was: %s\n" "$selected_locale"
 
 read -p "What do you want your hostname to be?: " hostname
 
@@ -173,5 +173,7 @@ while
 do true; done
 
 read -p "What do you want the name in the bootloader to be?, I recomend 'Artemis :)'?: " bootloader_title
+
+printf "You are going to install gentoo to %s\nYour timezone is %s\nYour locale is set to %s\nYour username is %s" "$install_media" "${tz_path#/usr/share/zoneinfo/}" "$selected_locale" "$username"
 
 #Mirrorselect will be called later in the programme
