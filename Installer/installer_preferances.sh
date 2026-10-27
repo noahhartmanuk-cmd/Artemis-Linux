@@ -1,5 +1,9 @@
 #!/bin/bash
 
+version_num="0.1"
+min_disk_size=10
+min_disk_size_bytes=$((min_disk_size * 1000000000))
+
 read_only_num() {
     local prompt=$1
     local return_value=1
@@ -23,7 +27,6 @@ read_only_num() {
     do true; done
 }
 
-version_num="0.1"
 latest_num_return=0
 is_part=0
 mapfile -t disks < <(lsblk --nodeps -noheadings --output PATH)
@@ -48,7 +51,9 @@ while
     [ $disk_num -gt ${#disks[@]} ]
 do true; done
 
-if [ "$(lsblk "${disks[(($disk_num - 1))]}" --noheadings --output PATH | grep "^/dev/" | wc -l)" -gt 1 ]; then
+disk=${disks[(($disk_num - 1))]}
+
+if [ "$(lsblk "$disk" --noheadings --output PATH | grep "^/dev/" | wc -l)" -gt 1 ]; then
     mapfile -t parts < <(lsblk "${disks[(($disk_num - 1))]}" --noheadings --output PATH)
     while 
         printf "Type the number of the partition you want to use\n"
@@ -62,16 +67,25 @@ if [ "$(lsblk "${disks[(($disk_num - 1))]}" --noheadings --output PATH | grep "^
 
         read_only_num "Number: "
         part_num=$latest_num_return
-        is_part=1
+
+        if [ $part_num -eq 1 ]; then
+            is_part=0
+        else
+            is_part=1
+        fi
+            install_media="${parts[(($part_num -1))]}"
 
         [ $part_num -gt ${#parts[@]} ]
     do true; done
-fi
-
-if [ "$is_part" -eq 1 ]; then
-    install_media="${parts[(($part_num -1))]}"
 else
     install_media="${disks[(($disk_num - 1))]}"
+fi
+    
+media_size_bytes=$(lsblk --bytes --noheadings --nodeps --output  SIZE "$install_media")
+if (( media_size_bytes < min_disk_size_bytes )); then
+    media_size=$((media_size_bytes / 1000000000))
+    printf "\e[0;31mYour chosen disk %s is only %sG, Please choose a disk larger than %sG then try again" "$install_media" "$media_size" "$min_disk_size"
+    exit 1
 fi
 
 printf "Are you sure you want to erase data and install Gentoo onto %s? (Y/n):" "$install_media"
@@ -174,7 +188,7 @@ do true; done
 
 read -p "What do you want the name in the bootloader to be?, I recomend 'Artemis :)'?: " bootloader_title
 
-printf "You are going to install gentoo to %s\nYour timezone is %s\nYour locale is set to %s\nYour username is %s" "$install_media" "${tz_path#/usr/share/zoneinfo/}" "$selected_locale" "$username"
+printf "\n\n\e[0;32mYou are going to install gentoo to %s\nYour timezone is %s\nYour locale is set to %s\nYour username is %s\n\n" "$install_media" "${tz_path#/usr/share/zoneinfo/}" "$selected_locale" "$username"
 
 #Mirrorselect will be called later in the programme
-./installer.sh 
+~/Projects/Artemis/Installer/installer.sh $install_media $is_part $disk $tz_path $selected_locale $rootpass $username $userpass 
