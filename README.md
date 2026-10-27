@@ -8,7 +8,7 @@
 | ╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝   ╚══════╝╚═╝     ╚═╝╚═╝╚══════╝╚═╝ |
 |                                                            |
 |                                                            |
-| The Linux for cool people 😎                               |
+| The Linux distro for cool people!                          |
 +------------------------------------------------------------+
 ```
 
@@ -55,7 +55,7 @@ You test this by running it on a Linux system that has the correct and populated
 
 * clone the directory with `git clone https://github.com/noahhartmanuk-cmd/Artemis-Linux`
 * execute `cd ./Artemis-Linux/`
-* Then you can trial the programme with `./Installer/installer.sh`
+* Then you can trial the programme with `./artemisinstall/artemisinstall.sh` (do not be confused with artemisinstaller which is the backend for artemisinstall which calls artemisinstaller within)
 
 Enjoy!
 

@@ -2,7 +2,7 @@
 
 version_num="0.1"
 min_disk_size=10
-min_disk_size_bytes=$((min_disk_size * 1000000000))
+min_disk_size_bytes=$((min_disk_size * 1073741824))
 
 read_only_num() {
     local prompt=$1
@@ -41,7 +41,7 @@ while
     i=1
 
     for disk in "${disks[@]}"; do
-        printf "%s: %s\n" "$i" "$disk"
+        printf "%s: %s   %s\n" "$i" "$disk" "$(lsblk --noheadings --nodeps --output LABEL $disk)"
         i=$((1+$i))
     done
 
@@ -61,7 +61,7 @@ if [ "$(lsblk "$disk" --noheadings --output PATH | grep "^/dev/" | wc -l)" -gt 1
         i=1
 
         for part in "${parts[@]}"; do
-        printf "%s: %s\n" "$i" "$part"
+        printf "%s: %s   %s\n" "$i" "$part" "$(lsblk --noheadings --nodeps --output LABEL $part)"
         i=$((1+$i))
         done
 
@@ -83,7 +83,7 @@ fi
     
 media_size_bytes=$(lsblk --bytes --noheadings --nodeps --output  SIZE "$install_media")
 if (( media_size_bytes < min_disk_size_bytes )); then
-    media_size=$((media_size_bytes / 1000000000))
+    media_size=$((media_size_bytes / 1073741824))
     printf "\e[0;31mYour chosen disk %s is only %sG, Please choose a disk larger than %sG then try again" "$install_media" "$media_size" "$min_disk_size"
     exit 1
 fi
@@ -191,4 +191,4 @@ read -p "What do you want the name in the bootloader to be?, I recomend 'Artemis
 printf "\n\n\e[0;32mYou are going to install gentoo to %s\nYour timezone is %s\nYour locale is set to %s\nYour username is %s\n\n" "$install_media" "${tz_path#/usr/share/zoneinfo/}" "$selected_locale" "$username"
 
 #Mirrorselect will be called later in the programme
-~/Projects/Artemis/Installer/installer.sh $install_media $is_part $disk $tz_path $selected_locale $rootpass $username $userpass 
+artemisinstaller $install_media $is_part $disk $tz_path $selected_locale $rootpass $username $userpass 
