@@ -61,7 +61,7 @@ You test this by running it on a Linux system that has the correct and populated
     cp ./artemisinstall/artemisinstaller.sh /usr/local/bin/artemisinstaller
     ```  
     (you may need to run this as root depending on your system)     
-* Then you can trial the programme with running `./artemisinstall/artemisinstall.sh` you may need to run this as root (e.g. `sudo`) (do not be confused with artemisinstaller which is the backend for artemisinstall which calls artemisinstaller within)
+* Then you can trial the programme with running `artemisinstall` you may need to run this as root (e.g. `sudo`) (do not be confused with artemisinstaller which is the backend for artemisinstall which calls artemisinstaller within)
 
 Enjoy!
 
