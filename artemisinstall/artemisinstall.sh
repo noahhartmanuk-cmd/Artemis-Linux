@@ -4,7 +4,7 @@ version_num="0.1"
 min_disk_size=10
 min_disk_size_bytes=$((min_disk_size * 1073741824))
 
-read_only_num() {
+read_only_num() {   #Soo much of the program needed to just be indexes I created a function
     local prompt=$1
     local return_value=1
     local index=1
@@ -34,7 +34,7 @@ mapfile -t disks < <(lsblk --nodeps -noheadings --output PATH)
 #Intro
 printf "Welcome to the Artemis installer, the launchpad to Artemis linux!\nThis will now slowly guide you through the install process, step by step, without too much Gentoo jargon ദി(ᵔᗜᵔ)\n\n"
 
-#Disk Selection/Partitioning
+#Disk Selection
 while
     
     printf "Type in the number of the disk that you want (if it is a partition that you want then you will get the option later\n"
@@ -56,7 +56,7 @@ disk=${disks[(($disk_num - 1))]}
 if [ "$(lsblk "$disk" --noheadings --output PATH | grep "^/dev/" | wc -l)" -gt 1 ]; then
     mapfile -t parts < <(lsblk "${disks[(($disk_num - 1))]}" --noheadings --output PATH)
     while 
-        printf "Type the number of the partition you want to use\n"
+        printf "Type the number of the partition you want to use pick number 1 if you want to use the whole disk\n"
 
         i=1
 
@@ -68,7 +68,7 @@ if [ "$(lsblk "$disk" --noheadings --output PATH | grep "^/dev/" | wc -l)" -gt 1
         read_only_num "Number: "
         part_num=$latest_num_return
 
-        if [ $part_num -eq 1 ]; then
+        if [ $part_num -eq 1 ]; then #To check if the user picked the while disk
             is_part=0
         else
             is_part=1
@@ -87,8 +87,6 @@ if (( media_size_bytes < min_disk_size_bytes )); then
     printf "\e[0;31mYour chosen disk %s is only %sG, Please choose a disk larger than %sG then try again" "$install_media" "$media_size" "$min_disk_size"
     exit 1
 fi
-
-printf "Are you sure you want to erase data and install Gentoo onto %s? (Y/n):" "$install_media"
 
 read disk_check
 
@@ -189,6 +187,8 @@ do true; done
 read -p "What do you want the name in the bootloader to be?, I recomend 'Artemis :)'?: " bootloader_title
 
 printf "\n\n\e[0;32mYou are going to install gentoo to %s\nYour timezone is %s\nYour locale is set to %s\nYour username is %s\n\n" "$install_media" "${tz_path#/usr/share/zoneinfo/}" "$selected_locale" "$username"
+
+printf "Are you sure you want to erase data and install Gentoo onto %s? (Y/n):" "$install_media"
 
 #Mirrorselect will be called later in the programme
 artemisinstaller $install_media $is_part $disk $tz_path $selected_locale $rootpass $username $userpass 

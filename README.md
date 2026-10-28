@@ -55,7 +55,13 @@ You test this by running it on a Linux system that has the correct and populated
 
 * clone the directory with `git clone https://github.com/noahhartmanuk-cmd/Artemis-Linux`
 * execute `cd ./Artemis-Linux/`
-* Then you can trial the programme with running `./artemisinstall/artemisinstall.sh` as root (e.g. `sudo`) (do not be confused with artemisinstaller which is the backend for artemisinstall which calls artemisinstaller within)
+* Move the installer files to your `/usr/local/bin` directory with:
+    ```bash
+    cp ./artemisinstall/artemisinstall.sh /usr/local/bin/artemisinstall
+    cp ./artemisinstall/artemisinstaller.sh /usr/local/bin/artemisinstaller
+    ```  
+    (you may need to run this as root depending on your system)     
+* Then you can trial the programme with running `./artemisinstall/artemisinstall.sh` you may need to run this as root (e.g. `sudo`) (do not be confused with artemisinstaller which is the backend for artemisinstall which calls artemisinstaller within)
 
 Enjoy!
 
