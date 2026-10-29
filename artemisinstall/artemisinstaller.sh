@@ -46,7 +46,7 @@ mapfile -t part_table <<< "$part_table_dump"
 
 	new_part_table=("${part_table[@]}")
 
-	install_media_prefix=$("$install_media :")
+	install_media_prefix=$("$install_media :") #Can compare up to the colon on every line of the table such that e.g. /dev/sda1 doesn't match with /dev/sda10
 
 	for entry in "${part_table[@]}"; do
 		if [[ ${entry:0:${#install_media_prefix}} == $install_media_prefix ]]; then
@@ -58,8 +58,8 @@ mapfile -t part_table <<< "$part_table_dump"
 
 	new_part_table=("${new_part_table[@]}") #Reindexes array after unset leaves gap
 
-	if [ "$found" -eq 0 ]; then
-		exit 1
+	if [ "$found" -eq 0 ]; then #Theoretically this shouldn't be needed but it stops the install process if the specified partition isn't in the spaecified disk
+		exit 1 
 	fi
 
 	new_part_table+=(
@@ -92,4 +92,58 @@ echo $efi_path
 
 yes | mkfs.vfat -F 32 "$efi_path"
 yes | mkfs.ext4 "$root_path"
+
+rm -rf /tmp/artemisinstaller
+rm -rf /mnt/Artemis/
+rm -rf /mnt/Artemis/efi/
+
+mkdir /mnt/Artemis
+mount "$root_path" /mnt/Artemis/
+if ! [ "$?" -eq 0 ]; then exit 1; fi
+mkdir /mnt/Artemis/efi
+mount "$efi_path" /mnt/Artemis/efi/
+if ! [ "$?" -eq 0 ]; then exit 1; fi
+
+i=0 
+
+while
+
+	gpg --auto-key-locate=clear,nodefault,wkd --locate-key releng@gentoo.org
+
+	if [ "$i" -gt 3 ]; then
+		rm -rf /tmp/artemisinstaller/
+		exit 1
+	fi
+
+	wget -r -q -nd -np -A '*' -P /tmp/artemisinstaller/ https://distfiles.gentoo.org/releases/amd64/autobuilds/current-stage3-amd64-openrc/
+
+	mapfile -t files < <(ls -1 /tmp/artemisinstaller)
+
+	found=0
+
+	for file in "${files[@]}"; do
+		if [[ "${file: -7:7}" == '.tar.xz' ]]; then
+			version_id="$file"
+			found=1
+		fi
+	done
+
+	if [ "$found" -eq 0 ]; then 
+		exit 1
+	fi
+
+	gpg --verify "/tmp/artemisinstaller/$version_id.asc" "/tmp/artemisinstaller/$version_id"
+	verified=$?
+
+	i+=1
+
+	! [ "$verified" -eq 0 ]
+do true; done
+
+mv "/tmp/artemisinstaller/$version_id" /tmp/
+rm -rf /tmp/artemisinstaller/
+
+tar xpf "/tmp/$version_id" --xattrs-include='*.*' --numeric-owner -C /mnt/Artemis
+
+rm "/tmp/$version_id"
 
