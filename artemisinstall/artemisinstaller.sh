@@ -31,12 +31,12 @@ if [ "$is_part" -eq 1 ]; then
 
 	if ! part_table_dump=$(sfdisk -d "$disk"); then
 		echo "part_table_dump"
-    	exit 1
+		exit 1
 	fi
 
 	if [[ -z $part_table_dump ]]; then
 		echo "part_table_dump2"
-    	exit 1
+		exit 1
 	fi
 
 mapfile -t part_table <<< "$part_table_dump"
