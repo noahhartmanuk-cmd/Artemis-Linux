@@ -53,6 +53,8 @@ So far this only collects the preferences for the installation as it is only ver
 
 You test this by running it on a Linux system that has the correct and populated locale and timezone directories (such as the system I'm using, Manjaro) I know that this is far from ideal but once I have the installer done I will be using Gentoo's catylist to build my own live ISO and stage file that you will run the installer on and the installer will install respectively.
 
+#### Warning: Using this on a disk will erase data PERMANENTLY! 
+
 * clone the directory with `git clone https://github.com/noahhartmanuk-cmd/Artemis-Linux`
 * execute `cd ./Artemis-Linux/`
 * Move the installer files to your `/usr/local/bin` directory with:
