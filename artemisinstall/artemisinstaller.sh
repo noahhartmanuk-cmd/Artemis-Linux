@@ -5,10 +5,11 @@ install_media=$1
 is_part=$2
 disk=$3
 tz_path=$4
-selected_locale=$5
+locale=$5
 rootpass=$6
 username=$7
 userpass=$8
+offensive=$9
 
 #Variables to edit to improve the experience
 min_disk_size_bytes=$((1073741824*10)) #See bellow
@@ -46,7 +47,7 @@ mapfile -t part_table <<< "$part_table_dump"
 
 	new_part_table=("${part_table[@]}")
 
-	install_media_prefix=$("$install_media :") #Can compare up to the colon on every line of the table such that e.g. /dev/sda1 doesn't match with /dev/sda10
+	install_media_prefix="$install_media :" #Can compare up to the colon on every line of the table such that e.g. /dev/sda1 doesn't match with /dev/sda10
 
 	for entry in "${part_table[@]}"; do
 		if [[ ${entry:0:${#install_media_prefix}} == $install_media_prefix ]]; then
@@ -84,6 +85,8 @@ else
 		exit 1
 	fi
 fi
+
+partprobe
 
 efi_path=$(blkid -t "PARTUUID=$efi_uuid" -o device) #Yes ik I  do not need to do this but it does make debugging easier 
 root_path=$(blkid -t "PARTUUID=$root_uuid" -o device)
@@ -147,3 +150,20 @@ tar xpf "/tmp/$version_id" --xattrs-include='*.*' --numeric-owner -C /mnt/Artemi
 
 rm "/tmp/$version_id"
 
+cat <<EOF >> /mnt/Artemis/etc/portage/make.conf
+USE="-systemd -X -gnome -kde -plasma bluetooth pulseaudio wayland wifi usb $offensive"
+EOF
+
+cp --dereference /etc/resolv.conf /mnt/Artemis/etc/resolv.conf
+cp /usr/local/bin/chrooted_setup /mnt/Artemis/usr/local/bin/chrooted_setup
+
+mount --types proc /proc /mnt/Artemis/proc
+mount --rbind /sys /mnt/Artemis/sys
+mount --make-rslave /mnt/Artemis/sys
+mount --rbind /dev /mnt/Artemis/dev
+mount --make-rslave /mnt/Artemis/dev
+mount --bind /run /mnt/Artemis/run
+mount --make-slave /mnt/Artemis/run 
+
+#The next line is uncomneted because it has not been finished yet :)
+#chroot /mnt/Artemis /bin/bash -c "chrooted_setup $tz_path $locale"

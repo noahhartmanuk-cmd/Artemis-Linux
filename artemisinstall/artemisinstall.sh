@@ -88,13 +88,6 @@ if (( media_size_bytes < min_disk_size_bytes )); then
 	exit 1
 fi
 
-read disk_check
-
-if [[ "$disk_check" != "y" && "$disk_check" != "Y" ]]; then
-	printf "Aborting Ascent..."
-	exit 1
-fi 
-
 #Selecting Locales, TZ, Mirrors
 
 mapfile -t zi_contents < <(ls /usr/share/zoneinfo/* -1d)
@@ -176,6 +169,7 @@ do true; done
 
 read -p "What do you want your username to be?: " username
 
+
 while
 	printf "What do you want %s's password to be?:\n" "$username"
 	read -s userpass
@@ -186,9 +180,23 @@ do true; done
 
 read -p "What do you want the name in the bootloader to be?, I recomend 'Artemis :)'?: " bootloader_title
 
+read -p "Do you want your system to be offensive? (e.g. instults when you type your password in wrong) (Y/n): " offensive
+
+if [[ "$offensive" == "y" || "$offensive" == "Y" ]]; then
+	offensive="offensive"
+else
+	offensive="-offensive"
+fi	
+
 printf "\n\n\e[0;32mYou are going to install gentoo to %s\nYour timezone is %s\nYour locale is set to %s\nYour username is %s\n\n" "$install_media" "${tz_path#/usr/share/zoneinfo/}" "$selected_locale" "$username"
 
 printf "Are you sure you want to erase data and install Gentoo onto %s? (Y/n):" "$install_media"
+read disk_check
+
+if [[ "$disk_check" != "y" && "$disk_check" != "Y" ]]; then
+	printf "Aborting Ascent..."
+	exit 1
+fi 
 
 #Mirrorselect will be called later in the programme
-artemisinstaller $install_media $is_part $disk $tz_path $selected_locale $rootpass $username $userpass 
+artemisinstaller $install_media $is_part $disk $tz_path $selected_locale $rootpass $username $userpass $offensive
