@@ -41,6 +41,9 @@ ss*L\=":+lLLl:'+llLLll+!_` '!::!-!s$$$$g
 SNNNNNNSsc+!_=?NNNNNNNNNNN$\_`-+?NNNNNNB
 ```
 
+<img width="1180" height="918" alt="image" src="https://github.com/user-attachments/assets/a7675dcd-6168-4034-ae46-7e7797b6eb96" />
+
+
 ### Artemis-Linux
 
 The start of my own gentoo-based desktop linux distro (It's the year of the linux desktop?)
