@@ -50,11 +50,17 @@ The start of my own gentoo-based desktop linux distro (It's the year of the linu
 
 Will be mostly guided by intuition and the [Gentoo handbook](https://wiki.gentoo.org/wiki/Handbook:AMD64/Full/Installation#Introduction) which is amazing if you like not going outside (trust me I know).
 
-So far this only collects the preferences for the installation as it is only version 0.1
+~~so far this only collects the preferences for the installation as it is only version 0.1~~
+Wayay, I did it, it is a program that people might find usefull, it collects preferances, partitions the disks and installs the kernel!
+
+Whilst this is a major milestone there is a reason that the first digit in the current version (v0.3) is not populated by a one and that is because this is still **VERY** pre-release and will not work on all systems
+
 
 ## How to use
 
-You test this by running it on a Linux system that has the correct and populated locale and timezone directories (such as the system I'm using, Manjaro) I know that this is far from ideal but once I have the installer done I will be using Gentoo's catylist to build my own live ISO and stage file that you will run the installer on and the installer will install respectively.
+You test this by running it on a Linux system that has the correct and populated locale and timezone directories (such as the system I'm using, Manjaro) I know that this is far from ideal but I plan on making a more user-friendly experience soon!
+
+This program, be warned is very slow, expect it to take up to an hour with a slow network and processor, this is due to the program doing a lot of compilation and downloading
 
 #### Warning: Using this on a disk will erase data PERMANENTLY! 
 
@@ -63,7 +69,9 @@ You test this by running it on a Linux system that has the correct and populated
 * Move the installer files to your `/usr/local/bin` directory with:
     ```bash
     cp ./artemisinstall/artemisinstall.sh /usr/local/bin/artemisinstall
+    chmod +x /usr/local/bin/artemisinstall
     cp ./artemisinstall/artemisinstaller.sh /usr/local/bin/artemisinstaller
+    chmod +x /usr/local/bin/artemisinstall 
     ```  
     (you may need to run this as root depending on your system)     
 * Then you can trial the programme with running `artemisinstall` you may need to run this as root (e.g. `sudo`) (do not be confused with artemisinstaller which is the backend for artemisinstall which calls artemisinstaller within)

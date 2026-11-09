@@ -198,5 +198,18 @@ if [[ "$disk_check" != "y" && "$disk_check" != "Y" ]]; then
 	exit 1
 fi 
 
-#Mirrorselect will be called later in the programme
-artemisinstaller $install_media $is_part $disk $tz_path $selected_locale $rootpass $username $userpass $offensive
+#Mirrorselect will be called in the on-first-boot setup wizard
+
+cat <<EOF > /tmp/artemisinstaller.conf
+$install_media
+$is_part
+$disk
+$tz_path
+$selected_locale
+$username
+$offensive
+$hostname
+EOF
+
+
+artemisinstaller /tmp/artemisinstaller.conf "$rootpass" "$userpass"
