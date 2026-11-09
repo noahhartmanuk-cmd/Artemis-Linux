@@ -221,4 +221,4 @@ done=1
 mount_dir="${mountpoints[@]}"
 prev_dir="$root_dir"
 
-#umount -R /mnt/Artemis
+umount -R /mnt/Artemis
