@@ -58,7 +58,9 @@ Whilst this is a major milestone there is a reason that the first digit in the c
 
 ## How to use
 
-You test this by running it on a Linux system that has the correct and populated locale and timezone directories (such as the system I'm using, Manjaro) I know that this is far from ideal but I plan on making a more user-friendly experience soon!
+#### Ensure that you have basic GNU/Linux utilities installed such as `sfdisk`, `uuidgen`, and `gpg` as the program will not run without them
+
+You test this by running it on a Linux system that has the correct and populated locale and timezone directories (such as the system I'm using, Manjaro) I know that this is far from ideal but I plan on making a more user-friendly experience soon! **This probably will not work on in container like docker, however it should work on a VM if you ensure that you pass through the block device that you are using**
 
 This program, be warned is very slow, expect it to take up to an hour with a slow network and processor, this is due to the program doing a lot of compilation and downloading
 

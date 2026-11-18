@@ -24,13 +24,19 @@ hostname=${conf_file_arr[7]}
 
 mapfile -t total_parts < <(lsblk "$install_media" --noheadings --output PATH)
 
+is_mounted=0
+
 for part in "${total_parts[@]}"; do
 	mapfile -t mountpoints < <(findmnt --raw --noheadings -o TARGET "$part")
 	for mountpoint in "${mountpoints[@]}"; do
-		echo "$mountpoint"
-		umount -R "$mountpoint"
+		printf "Your selected disk: %s has a mountpoint at: %s\nUnmount all mountpoints and try again!\n" "$part" "$mountpoint"
+		is_mounted=1
 	done
 done
+
+if [ "$is_mounted" -eq 1 ]; then
+	exit 1
+fi
 
 #Variables to edit to improve the experience
 min_disk_size_bytes=$((1073741824*10)) #See bellow
