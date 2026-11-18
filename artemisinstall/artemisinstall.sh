@@ -24,18 +24,18 @@ if ! command -v chroot >/dev/null s>&1; then
 fi
 
 
-if ! command -v sfdisk >/dev/null 2>&1; then
+if command -v sfdisk >/dev/null 2>&1; then
 	echo "You do not have sfdisk installed, install it and try again"
 	exit 1
 fi
 
-version_num="0.1"
+version_num="0.3"
 min_disk_size=10
 min_disk_size_bytes=$((min_disk_size * 1073741824))
 skip=0
 
 if (( EUID != 0 )) && [[ $1 != "--no-use-root" ]]; then
-	printf "You are not running this as root, this may not work to bypass this pass through the --no-use-root flag\n"
+	printf "You are not running this as root, this may not work\nto bypass this pass through the --no-use-root flag\n"
 	exit 1
 fi
 
