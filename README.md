@@ -56,11 +56,11 @@ Wayay, I did it, it is a program that people might find usefull, it collects pre
 Whilst this is a major milestone there is a reason that the first digit in the current version (v0.3) is not populated by a one and that is because this is still **VERY** pre-release and will not work on all systems
 
 
-## How to use
+## How to get started!
 
 #### Ensure that you have basic GNU/Linux utilities installed such as `sfdisk`, `uuidgen`, and `gpg` as the program will not run without them
 
-You test this by running it on a Linux system that has the correct and populated locale and timezone directories (such as the system I'm using, Manjaro) I know that this is far from ideal but I plan on making a more user-friendly experience soon! **This probably will not work on in container like docker, however it should work on a VM if you ensure that you pass through the block device that you are using**
+You test this by running it on a Linux system that has the correct and populated locale and timezone directories (such as the system I'm using, Manjaro) I know that this is far from ideal but I plan on making a more user-friendly experience soon! **This may not work on in container like docker, however it should work on a VM if you ensure that you pass through the block device that you are using**
 
 This program, be warned is very slow, expect it to take up to an hour with a slow network and processor, this is due to the program doing a lot of compilation and downloading
 
@@ -75,8 +75,20 @@ This program, be warned is very slow, expect it to take up to an hour with a slo
     cp ./artemisinstall/artemisinstaller.sh /usr/local/bin/artemisinstaller
     chmod +x /usr/local/bin/artemisinstall 
     ```  
-    (you may need to run this as root depending on your system)     
-* Then you can trial the programme with running `artemisinstall` you may need to run this as root (e.g. `sudo`) (do not be confused with artemisinstaller which is the backend for artemisinstall which calls artemisinstaller within)
+    (you may need to run this as root depending on your system) 
+
+## How to use
+
+The process is entirely interactive and it will prompt you to take the install step-by-step so due to that and the recent rapid development of the installer I will not take you through each step now but to start there are a few things you might want to look up before you decide to uninstall your current, insuperior OS:
+
+* You will want to make note of the timezone that you are installing this in, there will be more advanced timezoning options in the future however, now, you will have to pick one
+* You will also want to get your locale, it does a bunch of stuff that is usefull for a functioning OS
+* There are other options but those are more up to personal preferance (if you want your hostname to be "notaramguzzler" you could!)
+
+There are also some flags that you can run on `artemisinstall` however both of these are strongly advised against and may throw errors:
+
+*  `--accept-loop-devices` shows loop devices in the device menu, this actually isn't that bad because there are some viable usecases (installing Artemis to a VM, testing...) in fact I use loop devices to test the latest versions of the installer but they can break your current install in some scenarios, so I have ommited them from the device list to avoid confusion
+* `--no-use-root` will ALMOST DEFINITELY make the installer throw errors and not install Artemis, I do not recommend that you run this even if you know what you are doing; it's just a waste of time
 
 Enjoy!
 
