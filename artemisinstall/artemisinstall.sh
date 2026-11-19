@@ -24,18 +24,34 @@ if ! command -v chroot >/dev/null s>&1; then
 fi
 
 
-if command -v sfdisk >/dev/null 2>&1; then
+if ! command -v sfdisk >/dev/null 2>&1; then
 	echo "You do not have sfdisk installed, install it and try again"
 	exit 1
 fi
+
+no_use_root_flag=0
+accept_loop_devices_flag=0 
+
+for arg in "$@"; do
+	if [ "$arg" == "--no-use-root" ]; then
+		echo -e "\033[0;31mYou have bypassed the root check and this WILL stop the programme from working correctly (in most scenarios, there are a VERY small number of cases where this will work)!\033[0m"
+		no_use_root_flag=1
+	elif [ "$arg" == "--accept-loop-devices" ]; then
+		echo -e "\033[0;31mYou have chosen to show loop devices this may be risky if you are in an environment that uses virtual disks!\033[0m"
+		accept_loop_devices_flag=1
+	else
+		echo "The argument \"$arg\" is not recognised!"
+		exit 1
+	fi
+done
 
 version_num="0.3"
 min_disk_size=10
 min_disk_size_bytes=$((min_disk_size * 1073741824))
 skip=0
 
-if (( EUID != 0 )) && [[ $1 != "--no-use-root" ]]; then
-	printf "You are not running this as root, this may not work\nto bypass this pass through the --no-use-root flag\n"
+if (( EUID != 0 )) && [[ "$no_use_root_flag" -eq 0 ]]; then
+	printf "You are not running this as root\nto bypass this check use the --no-use-root flag\n"
 	exit 1
 fi
 
@@ -94,8 +110,12 @@ read_only_num() {   #Soo much of the program needed to just be indexes I created
 if [[ "$skip" == "0" ]]; then
 	latest_num_return=0
 	is_part=0
-	mapfile -t disks < <(lsblk --nodeps -noheadings --output PATH)
 
+	if [ "$accept_loop_devices_flag" -eq 0 ]; then
+		mapfile -t disks < <(lsblk --nodeps --noheadings --output PATH -Q 'TYPE=="disk"')
+	else
+		mapfile -t disks < <(lsblk --nodeps --noheadings --output PATH)
+	fi
 	#Intro
 	printf "Welcome to the Artemis installer, the launchpad to Artemis linux!\nThis will now slowly guide you through the install process, step by step, without too much Gentoo jargon ദി(ᵔᗜᵔ)\n\n"
 
@@ -269,6 +289,9 @@ fi
 
 	#Mirrorselect will be called in the on-first-boot setup wizard
 if [[ "$skip" == "0" ]]; then
+
+	rm /tmp/artemisinstaller.conf
+
 	cat <<-EOF > /tmp/artemisinstaller.conf
 	$install_media
 	$is_part

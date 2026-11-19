@@ -205,8 +205,8 @@ mount --make-rslave /mnt/Artemis/dev
 mount --bind /run /mnt/Artemis/run
 mount --make-slave /mnt/Artemis/run 
 
-#The next line is uncomneted because it has not been finished yet :)
-chroot /mnt/Artemis /bin/bash -c "chmod +x /usr/local/bin/chrooted_setup && chrooted_setup $tz_path $locale" #Making file execuatable then using && to only attempt to run it if that works
+#The next line is comneted because it has not been finished yet :)
+#chroot /mnt/Artemis /bin/bash -c "chmod +x /usr/local/bin/chrooted_setup && chrooted_setup $tz_path $locale" #Making file execuatable then using && to only attempt to run it if that works
 
 rm /mnt/Artemis/usr/local/bin/chrooted_setup
 
@@ -219,12 +219,5 @@ UUID=$root_uuid    /            ext4    defaults,noatime    0 1
 EOF
 
 echo $hostname > /mnt/Artemis/etc/hostname
-
-mapfile -t mount_dir < <(findmnt "$root_dir" --raw -R -o TARGET)
-
-done=1
-
-mount_dir="${mountpoints[@]}"
-prev_dir="$root_dir"
 
 umount -R /mnt/Artemis
