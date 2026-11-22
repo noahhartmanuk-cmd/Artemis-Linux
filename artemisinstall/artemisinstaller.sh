@@ -189,10 +189,6 @@ tar xpf "/tmp/$version_id" --xattrs-include='*.*' --numeric-owner -C /mnt/Artemi
 
 rm "/tmp/$version_id"
 
-cat <<EOF >> /mnt/Artemis/etc/portage/make.conf
-USE="-systemd -grub -X -gnome -kde -plasma systemd-boot dist-kernel bluetooth pulseaudio wayland wifi usb $offensive"
-ACCEPT_LICENSE="*"
-EOF
 
 cp --dereference /etc/resolv.conf /mnt/Artemis/etc/resolv.conf
 cp /usr/local/bin/chrooted_setup /mnt/Artemis/usr/local/bin/chrooted_setup
@@ -205,8 +201,17 @@ mount --make-rslave /mnt/Artemis/dev
 mount --bind /run /mnt/Artemis/run
 mount --make-slave /mnt/Artemis/run 
 
+cat <<EOF > /mnt/Artemis/etc/make.conf
+ACCEPT_LICENSE="*"
+EOF
+
 #The next line is comneted because it has not been finished yet :)
-#chroot /mnt/Artemis /bin/bash -c "chmod +x /usr/local/bin/chrooted_setup && chrooted_setup $tz_path $locale" #Making file execuatable then using && to only attempt to run it if that works
+chroot /mnt/Artemis /bin/bash -c "chmod +x /usr/local/bin/chrooted_setup && chrooted_setup $tz_path $locale" #Making file execuatable then using && to only attempt to run it if that works
+
+
+cat <<EOF >> /mnt/Artemis/etc/portage/make.conf
+USE="-systemd -grub -X -gnome -kde -plasma systemd-boot dist-kernel bluetooth pulseaudio wayland wifi usb $offensive"
+EOF
 
 rm /mnt/Artemis/usr/local/bin/chrooted_setup
 
@@ -220,4 +225,5 @@ EOF
 
 echo $hostname > /mnt/Artemis/etc/hostname
 
-umount -R /mnt/Artemis
+#If the bellow is commented out this is me being very silly because I must have not tidied up after debugging
+# umount -R /mnt/Artemis

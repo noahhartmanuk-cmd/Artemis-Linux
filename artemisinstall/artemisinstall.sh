@@ -63,7 +63,7 @@ if [ -f /tmp/artemisinstaller.conf ]; then
 	is_part=${conf_file_arr[1]}
 	disk=${conf_file_arr[2]}
 	tz_path=${conf_file_arr[3]}
-	locale=${conf_file_arr[4]}
+	selected_locale=${conf_file_arr[4]}
 	username=${conf_file_arr[5]}
 	offensive=${conf_file_arr[6]}
 	hostname=${conf_file_arr[7]}

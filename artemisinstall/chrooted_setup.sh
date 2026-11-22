@@ -33,6 +33,7 @@ echo "LANG=\"$locale\"" >> /etc/env.d/02locale
 echo "It works!"
 
 mkdir -p /etc/cmdline.d
+printf "quiet splash" >> /etc/kernel/cmdline
 ln -s /etc/kernel/cmdline /etc/cmdline.d/00-installkernel.conf
 
 cat <<EOF > /etc/portage/package.use/systemd-boot
@@ -47,6 +48,6 @@ yes | emerge sys-kernel/installkernel
 if ! [ "$?" -eq 0 ]; then
     exit 2
 fi
-yes | emerge sys-kernel/gentoo-kernel-bin
+yes | emerge sys-kernel/gentoo-kernel
 
 exit
