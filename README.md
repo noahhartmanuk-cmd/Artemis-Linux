@@ -64,7 +64,7 @@ I have a lot of ambitions for this project and I will list them here, bear in mi
 
 * I want to have a plugin system so that people can add modules and configurations for the individual parts of the system all packaged into one easy to install package
 
-I may not achieve all of these but I will hope th choose as many as possible!
+I may not achieve all of these but I will hope to do as many as possible!
 
 ## How to get started!
 
