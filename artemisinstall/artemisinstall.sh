@@ -18,7 +18,7 @@ if ! command -v wget >/dev/null 2>&1; then
 fi
 
 
-if ! command -v chroot >/dev/null s>&1; then
+if ! command -v chroot >/dev/null 2>&1; then
 	echo "You do not have chroot installed, install it and try again"
 	exit 1
 fi
@@ -67,9 +67,10 @@ if [ -f /tmp/artemisinstaller.conf ]; then
 	username=${conf_file_arr[5]}
 	offensive=${conf_file_arr[6]}
 	hostname=${conf_file_arr[7]}
-	last_line_check=${conf_file_arr[8]}
+	comp_kernel=${conf_file_arr[8]}
+	last_line_check=${conf_file_arr[9]}
 
-	if [[ "$last_line_check" == "#CREATED WITH ARTEMISINSTALL" && "${#conf_file_arr[@]}" -eq "9" ]]; then
+	if [[ "$last_line_check" == "#CREATED WITH ARTEMISINSTALL" && "${#conf_file_arr[@]}" -eq "10" ]]; then
 		while
 			printf "The config file for the last session was found at /tmp/artemisinstaller.conf do you wish to use that for info (press i to see contents of file) (disks, locales, timezone...) (Y/n):"
 			read use_conf
@@ -243,6 +244,14 @@ if [[ "$skip" == "0" ]]; then
 	printf "Your selected locale was: %s\n" "$selected_locale"
 
 	read -p "What do you want your hostname to be?: " hostname
+
+	read -p "Do you want to compile the kernel (saying yes may take a lot longer) (Y/n): " comp_kernel
+
+	if [[ "$comp_kernel" == "Y" || "$comp_kernel" == "y" ]]; then
+		comp_kernel=1
+	else
+		comp_kernel=0
+	fi
 fi
 
 while
@@ -250,7 +259,7 @@ while
 	read -s rootpass
 	printf "Repeat, for safety : )\n"
 	read -s rootpass_check
-	[ $rootpass != $rootpass_check ]
+	[ "$rootpass" != "$rootpass_check" ]
 do true; done
 
 if [[ "$skip" == "0" ]]; then
@@ -262,7 +271,7 @@ while
 	read -s userpass
 	printf "Repeat, for safety : )\n"
 	read -s userpass_check
-	[ $userpass != $userpass_check ]
+	[ "$userpass" != "$userpass_check" ]
 do true; done
 
 if [[ "$skip" == "0" ]]; then
@@ -301,8 +310,16 @@ if [[ "$skip" == "0" ]]; then
 	$username
 	$offensive
 	$hostname
+	$comp_kernel
 	#CREATED WITH ARTEMISINSTALL
 	EOF
 fi
 
-	artemisinstaller /tmp/artemisinstaller.conf "$rootpass" "$userpass"
+pass_dir=$(tr -dc 'A-Za-z0-9' < /dev/urandom | head -c 16)
+
+cat <<EOF > /tmp/$pass_dir
+$rootpass
+$userpass
+EOF
+
+artemisinstaller /tmp/artemisinstaller.conf "$pass_dir"

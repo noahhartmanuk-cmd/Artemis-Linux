@@ -1,5 +1,6 @@
 timezone=$1
 locale=$2
+comp_kernel=$3
 
 source /etc/profile
 
@@ -48,6 +49,15 @@ yes | emerge sys-kernel/installkernel
 if ! [ "$?" -eq 0 ]; then
     exit 2
 fi
-yes | emerge sys-kernel/gentoo-kernel
+
+if [ "$comp_kernel" -eq 0 ]; then 
+    yes | emerge sys-kernel/gentoo-kernel-bin
+else
+    yes | emerge sys-kernel/gentoo-kernel
+fi
+
+if [ ! "$?" -eq 0 ]; then
+    exit 1
+fi
 
 exit

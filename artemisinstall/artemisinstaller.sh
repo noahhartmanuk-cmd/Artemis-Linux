@@ -10,8 +10,12 @@ if ! [ "$?" -eq 0 ]; then
 	exit 1
 fi
 
-rootpass=$2
-userpass=$3
+mapfile -t passes < <(cat "/tmp/$2")
+
+rm "/tmp/$2"
+
+rootpass=${passes[0]}
+userpass=${passes[1]}
 
 install_media=${conf_file_arr[0]} 
 is_part=${conf_file_arr[1]}
@@ -21,6 +25,7 @@ locale=${conf_file_arr[4]}
 username=${conf_file_arr[5]}
 offensive=${conf_file_arr[6]}
 hostname=${conf_file_arr[7]}
+comp_kernel=${conf_file_arr[8]}
 
 mapfile -t total_parts < <(lsblk "$install_media" --noheadings --output PATH)
 
@@ -92,7 +97,7 @@ if [ "$is_part" -eq 1 ]; then
 
 	new_part_table+=(
 		"start= $part_start, size= $((efi_part_size_bytes / 512)), type= C12A7328-F81F-11D2-BA4B-00A0C93EC93B, uuid= $efi_uuid name=\"EFI system partition\""
-		"start= $((part_start + (efi_part_size_bytes / 512))), size= $((part_size / 512 - (efi_part_size_bytes / 512))), type= 0fc63daf-8483-4772-8e79-3d69d8477de4, uuid= $root_uuid name=\"Gentoo/Artemis root partition\""
+		"start= $((part_start + (efi_part_size_bytes / 512))), size= $((part_size / 512 - (efi_part_size_bytes / 512))), type= 0fc63daf-8483-4772-8e79-3d69d8477de4, uuid= $root_uuid, name=\"Gentoo/Artemis root partition\""
 	)
 	
 	if ! (for line in "${new_part_table[@]}"; do
@@ -206,7 +211,7 @@ ACCEPT_LICENSE="*"
 EOF
 
 #The next line is comneted because it has not been finished yet :)
-chroot /mnt/Artemis /bin/bash -c "chmod +x /usr/local/bin/chrooted_setup && chrooted_setup $tz_path $locale" #Making file execuatable then using && to only attempt to run it if that works
+# chroot /mnt/Artemis /bin/bash -c "chmod +x /usr/local/bin/chrooted_setup && chrooted_setup $tz_path $locale $comp_kernel" #Making file execuatable then using && to only attempt to run it if that works
 
 
 cat <<EOF >> /mnt/Artemis/etc/portage/make.conf
