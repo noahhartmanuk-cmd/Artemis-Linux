@@ -38,7 +38,6 @@ printf "quiet splash" >> /etc/kernel/cmdline
 ln -s /etc/kernel/cmdline /etc/cmdline.d/00-installkernel.conf
 
 cat <<EOF > /etc/portage/package.use/systemd-boot
-sys-apps/systemd boot
 sys-apps/systemd-utils boot kernel-install
 sys-kernel/installkernel systemd systemd-boot dracut
 EOF
@@ -59,5 +58,23 @@ fi
 if [ ! "$?" -eq 0 ]; then
     exit 1
 fi
+
+yes | emerge net-misc/networkmanager
+
+if [ ! "$?" -eq 0 ]; then
+    exit 1
+fi
+
+rc-update add NetworkManager default
+
+echo "$rootpass" | passwd --stdin
+
+yes | emerge net-misc/chrony
+
+rc-update add chronyd default
+
+yes | emerge sys-apps/systemd-utils
+
+bootctl install
 
 exit

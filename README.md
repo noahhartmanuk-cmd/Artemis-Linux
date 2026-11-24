@@ -50,19 +50,23 @@ The start of my own gentoo-based desktop linux distro (It's the year of the linu
 
 I, whilst only being 14 have a decent amount of linux experience especially with Debian, Arch (btw) and more recently Gentoo albeit I am still lerning and this project may never well be perfect!
 
-I have a lot of ambitions for this project and I will list them here, bear in mind this is by no means a solid project plan so take it with a heavy pinch of salt: 
+I have a lot of ambitions for this project and I will list them here, bear in mind this is by no means a solid project plan or roadmap so take it with a heavy pinch of salt:
 
-* Once I have v1.0 finished and usable I want to start developing my own package manager that utilises Geismtoo's ebuild repositories such that once Artemis goes online it already has a solid collection of mantained packages
+* I do eventually want to make Artemis independant from Gentoo, which means that I have more control on various core parts of the system!
 
-* Smart defaults: This is what the core philosophy of my distro will be, I will be using already amazing, open-source projects to make my distro work for example [Niri](https://github.com/niri-wm/niri), the scrolling window manager but my addition on top of this will be getting it to integrate perfectly with the other pieces of Artemis with practical and nice looking defaults
+* Once I have v1.0 finished and usable I want to start developing my own package manager that utilises Gentoo's ebuild repositories such that once Artemis goes online it already has a solid collection of mantained packages
 
-* Emphasis on the word *defaults*: I think that [Omarchy](https://omarchy.org/) does a lot of really cool and inovative aspects but I think that the options at install time are too minimal and may contribute to the 6GB! ISO file
+* Smart defaults: This is what the core philosophy of my distro will be, I will be using already amazing, open-source projects to make my distro work for example [Niri](https://github.com/niri-wm/niri), the scrolling window manager, but my addition on top of this will be getting it to integrate perfectly with the other pieces of Artemis with practical and nice looking defaults
 
-* I want to make security a big focus on my distro without going too overboard, I want at least to have secure boot and disk encryption on by default, however I am interested in wireguard networks so I might see if I can make it easy to spin one up
+* Emphasis on the word *defaults*: I think that [Omarchy](https://omarchy.org/) does have a lot of really cool and inovative aspects but I think that the options at install time are too minimal and may contribute to the 6GB! ISO file
+
+* I want to make Artemis somewhat secure but and secure in a way where it shouldn't impact daily performance or usability, I want at least to have secure boot and disk encryption on by default, however I am interested in wireguard networks so I might see if I can make it easy to spin one up
 
 * I want to write a unified settings application, such that you do not need to edit config files for each individual part of the system
 
 * I want to have a plugin system so that people can add modules and configurations for the individual parts of the system all packaged into one easy to install package
+
+* Last but not least **MINIMALISIM!**, as you may be able to tell by the substantial ascii art that greets you when you make the amazing decition to visit this github page, I am a big fan of the terminal, CLIs, and naturally, TUIs! this along with Artemis only coming with what you configure hopefully will make Artemis a very minimal distro unlike some other OSes \**coughs*\* Windows
 
 I may not achieve all of these but I will hope to do as many as possible!
 
@@ -78,11 +82,13 @@ This program, be warned is very slow, expect it to take up to an hour with a slo
 
 * clone the directory with `git clone https://github.com/noahhartmanuk-cmd/Artemis-Linux`
 * execute `cd ./Artemis-Linux/`
-* Move the installer files to your `/usr/local/bin` directory with:
+* Move the installer files in `artemisinstall/` to your `/usr/local/bin` directory with:
     ```bash
     cp ./artemisinstall/artemisinstall.sh /usr/local/bin/artemisinstall
     chmod +x /usr/local/bin/artemisinstall
     cp ./artemisinstall/artemisinstaller.sh /usr/local/bin/artemisinstaller
+    chmod +x /usr/local/bin/artemisinstall
+    cp ./chrooted_setup.sh /usr/local/bin/artemisinstaller
     chmod +x /usr/local/bin/artemisinstall 
     ```  
     (**you may need to run this as root depending on your system**) 
@@ -93,12 +99,15 @@ The process is entirely interactive and it will prompt you to take the install s
 
 * You will want to make note of the timezone that you are installing this in, there will be more advanced timezoning options in the future however, now, you will have to pick one
 * You will also want to get your locale, it does a bunch of stuff that is usefull for a functioning OS
+* You get the option to use a precompiled kernel or to compile it yourself, this really depends on you and your machine, it can take a while on older machines and you might just prefer to install a precompiled kernel which is what I reccomend you do if none of what I just said made sense to you
 * There are other options but those are more up to personal preferance (if you want your hostname to be "notaramguzzler" you could!)
 
-There are also some flags that you can run on `artemisinstall` however both of these are strongly advised against and may throw errors:
+There are also some flags that you can run on `artemisinstall` however some of these are strongly advised against and may throw errors:
 
 *  `--accept-loop-devices` shows loop devices in the device menu, this actually isn't that bad because there are some viable usecases (installing Artemis to a VM, testing...) in fact I use loop devices to test the latest versions of the installer but they can break your current install in some scenarios, so I have ommited them from the device list to avoid confusion
 * `--no-use-root` bypasses the check that the script is being run as root and will ALMOST DEFINITELY make the installer throw errors and not install Artemis, I do not recommend that you run this even if you know what you are doing; it's just a waste of time
+* `--bypass-mount-check` try and guess what this one does... ...correct it *does* bypass the check for all the mountpoints of the install media, if the installer is being funny you might need to use it but it can be risky so you didn't hear that from me if that breaks your system :)
+* `--pretend` this one makes my code more useless...    ...which I guess makes it more usefull? What it does is allow you to go through all the options of the installer without installing anything, it also internally calls `--bypass-mount-check` and `--no-use-root` such that you don't have to run it as root and you don't get bothered that your disk is mounted even though you aren't actually doing anything with it!
 
 Enjoy!
 

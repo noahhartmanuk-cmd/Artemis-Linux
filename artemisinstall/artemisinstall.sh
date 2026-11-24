@@ -1,36 +1,9 @@
 #!/bin/bash
 
-if ! command -v gpg >/dev/null 2>&1; then
-	echo "You do not have gpg installed, install it and try again"
-	exit 1
-fi
-
-
-if ! command -v uuidgen >/dev/null 2>&1; then
-	echo "You do not have uuidgen installed, install it and try again"
-	exit 1
-fi
-
-
-if ! command -v wget >/dev/null 2>&1; then
-	echo "You do not have wget installed, install it and try again"
-	exit 1
-fi
-
-
-if ! command -v chroot >/dev/null 2>&1; then
-	echo "You do not have chroot installed, install it and try again"
-	exit 1
-fi
-
-
-if ! command -v sfdisk >/dev/null 2>&1; then
-	echo "You do not have sfdisk installed, install it and try again"
-	exit 1
-fi
-
 no_use_root_flag=0
-accept_loop_devices_flag=0 
+accept_loop_devices_flag=0
+bypass_mount_check_flag=0
+pretend_flag=0
 
 for arg in "$@"; do
 	if [ "$arg" == "--no-use-root" ]; then
@@ -39,19 +12,62 @@ for arg in "$@"; do
 	elif [ "$arg" == "--accept-loop-devices" ]; then
 		echo -e "\033[0;31mYou have chosen to show loop devices this may be risky if you are in an environment that uses virtual disks!\033[0m"
 		accept_loop_devices_flag=1
+	elif [ "$arg" == "--bypass-mount-check" ]; then
+		echo -e "\033[0;31mYou have chosen to bypass the check that there are no mountpoints on the install media, if there are artemisinstaller may cause errors in your system\033[0m"
+		bypass_mount_check_flag=1 
+	elif [ "$arg" == "--pretend" ]; then
+		echo -e "You have chosen to do a pretend install, this will not actually install anything onto the selected disk but with this you can play around with the preferences risk-free, this will also skip the root check so you may run this not as superuser" 
+		pretend_flag=1
+		no_use_root_flag=1
+		bypass_mount_check_flag=1
 	else
 		echo "The argument \"$arg\" is not recognised!"
 		exit 1
 	fi
 done
 
+if ! [ "$pretend_flag" -eq 1 ]; then 
+	if ! command -v gpg >/dev/null 2>&1; then
+		echo "You do not have gpg installed, install it and try again"
+		exit 1
+	fi
+
+
+	if ! command -v uuidgen >/dev/null 2>&1; then
+		echo "You do not have uuidgen installed, install it and try again"
+		exit 1
+	fi
+
+
+	if ! command -v wget >/dev/null 2>&1; then
+		echo "You do not have wget installed, install it and try again"
+		exit 1
+	fi
+
+
+	if ! command -v chroot >/dev/null 2>&1; then
+		echo "You do not have chroot installed, install it and try again"
+		exit 1
+	fi
+
+
+	if ! command -v sfdisk >/dev/null 2>&1; then
+		echo "You do not have sfdisk installed, install it and try again"
+		exit 1
+	fi
+fi
+
+
+
 version_num="0.3"
 min_disk_size=10
 min_disk_size_bytes=$((min_disk_size * 1073741824))
 skip=0
+is_mounted=0
+
 
 if (( EUID != 0 )) && [[ "$no_use_root_flag" -eq 0 ]]; then
-	printf "You are not running this as root\nto bypass this check use the --no-use-root flag\n"
+	printf "\033[0;31mYou are not running this as root\nto bypass this check use the --no-use-root flag\n\033[0m"
 	exit 1
 fi
 
@@ -70,11 +86,28 @@ if [ -f /tmp/artemisinstaller.conf ]; then
 	comp_kernel=${conf_file_arr[8]}
 	last_line_check=${conf_file_arr[9]}
 
+
+
+
 	if [[ "$last_line_check" == "#CREATED WITH ARTEMISINSTALL" && "${#conf_file_arr[@]}" -eq "10" ]]; then
 		while
 			printf "The config file for the last session was found at /tmp/artemisinstaller.conf do you wish to use that for info (press i to see contents of file) (disks, locales, timezone...) (Y/n):"
 			read use_conf
 			if [[ "$use_conf" == "Y" || "$use_conf" == "y" ]]; then
+				mapfile -t total_parts < <(lsblk "$install_media" --noheadings --output PATH)
+
+				if [ "$bypass_mount_check_flag" == 0 ]; then
+					for part in "${total_parts[@]}"; do
+						mapfile -t mountpoints < <(findmnt --raw --noheadings -o TARGET "$part")
+						for mountpoint in "${mountpoints[@]}"; do
+							printf "\033[0;31mYour selected disk: %s has a mountpoint at: %s\nUnmount all mountpoints and try again!\n\033[0m" "$part" "$mountpoint"
+							is_mounted=1
+						done
+					done
+					if [ "$is_mounted" -eq 1 ]; then
+						exit 1
+					fi
+				fi
 				skip=1	
 			elif [[ "$use_conf" == "i" || "$use_conf" == "I" ]]; then
 				cat /tmp/artemisinstaller.conf
@@ -172,6 +205,22 @@ if [[ "$skip" == "0" ]]; then
 		media_size=$((media_size_bytes / 1073741824))
 		printf "\e[0;31mYour chosen disk %s is only %sG, Please choose a disk larger than %sG then try again" "$install_media" "$media_size" "$min_disk_size"
 		exit 1
+	fi
+
+
+	mapfile -t total_parts < <(lsblk "$install_media" --noheadings --output PATH)
+
+	if [ "$bypass_mount_check_flag" == 0 ]; then
+		for part in "${total_parts[@]}"; do
+			mapfile -t mountpoints < <(findmnt --raw --noheadings -o TARGET "$part")
+			for mountpoint in "${mountpoints[@]}"; do
+				is_mounted=1
+				printf "\033[0;31mYour selected disk: %s has a mountpoint at: %s\nUnmount all mountpoints and try again!\n\033[0m" "$part" "$mountpoint"
+			done
+		done
+		if [ "$is_mounted" -eq 1 ]; then
+			exit 1
+		fi
 	fi
 
 	#Selecting Locales, TZ, Mirrors
@@ -286,15 +335,15 @@ if [[ "$skip" == "0" ]]; then
 	fi	
 fi
 
-	printf "\n\n\e[0;32mYou are going to install gentoo to %s\nYour timezone is %s\nYour locale is set to %s\nYour username is %s\n\n" "$install_media" "${tz_path#/usr/share/zoneinfo/}" "$selected_locale" "$username"
+printf "\n\n\e[0;32mYou are going to install gentoo to %s\nYour timezone is %s\nYour locale is set to %s\nYour username is %s\n\n" "$install_media" "${tz_path#/usr/share/zoneinfo/}" "$selected_locale" "$username"
 
-	printf "Are you sure you want to erase data and install Gentoo onto %s? (Y/n):" "$install_media"
-	read disk_check
+printf "Are you sure you want to erase data and install Gentoo onto %s? (Y/n):" "$install_media"
+read disk_check
 
-	if [[ "$disk_check" != "y" && "$disk_check" != "Y" ]]; then
-		printf "Aborting Ascent..."
-		exit 1
-	fi 
+if [[ "$disk_check" != "y" && "$disk_check" != "Y" ]]; then
+	printf "Aborting Ascent..."
+	exit 1
+fi 
 
 	#Mirrorselect will be called in the on-first-boot setup wizard
 if [[ "$skip" == "0" ]]; then
@@ -322,4 +371,8 @@ $rootpass
 $userpass
 EOF
 
-artemisinstaller /tmp/artemisinstaller.conf "$pass_dir"
+if [ ! "$pretend_flag" -eq 1 ]
+	artemisinstaller /tmp/artemisinstaller.conf "$pass_dir"
+fi
+
+echo "Thank you for using artemisinstall, I hope you enjoy using Gentoo!, happy compiliation"

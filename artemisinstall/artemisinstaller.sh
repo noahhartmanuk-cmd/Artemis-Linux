@@ -27,21 +27,6 @@ offensive=${conf_file_arr[6]}
 hostname=${conf_file_arr[7]}
 comp_kernel=${conf_file_arr[8]}
 
-mapfile -t total_parts < <(lsblk "$install_media" --noheadings --output PATH)
-
-is_mounted=0
-
-for part in "${total_parts[@]}"; do
-	mapfile -t mountpoints < <(findmnt --raw --noheadings -o TARGET "$part")
-	for mountpoint in "${mountpoints[@]}"; do
-		printf "Your selected disk: %s has a mountpoint at: %s\nUnmount all mountpoints and try again!\n" "$part" "$mountpoint"
-		is_mounted=1
-	done
-done
-
-if [ "$is_mounted" -eq 1 ]; then
-	exit 1
-fi
 
 #Variables to edit to improve the experience
 min_disk_size_bytes=$((1073741824*10)) #See bellow
@@ -210,12 +195,23 @@ cat <<EOF > /mnt/Artemis/etc/make.conf
 ACCEPT_LICENSE="*"
 EOF
 
-#The next line is comneted because it has not been finished yet :)
-# chroot /mnt/Artemis /bin/bash -c "chmod +x /usr/local/bin/chrooted_setup && chrooted_setup $tz_path $locale $comp_kernel" #Making file execuatable then using && to only attempt to run it if that works
+clean_locale=${locale%% *}
+echo "$comp_kernel"
 
+#The next line is comneted because it has not been finished yet :)
+chroot /mnt/Artemis /bin/bash -c "chmod +x /usr/local/bin/chrooted_setup && chrooted_setup $tz_path $clean_locale $comp_kernel" #Making file execuatable then using && to only attempt to run it if that works
 
 cat <<EOF >> /mnt/Artemis/etc/portage/make.conf
-USE="-systemd -grub -X -gnome -kde -plasma systemd-boot dist-kernel bluetooth pulseaudio wayland wifi usb $offensive"
+USE="-systemd -grub -X -gnome -kde -plasma systemd-boot dist-kernel bluetooth pulseaudio wayland wifi usb networkmanager $offensive"
+EOF
+
+cat <<EOF >> /mnt/Artemis/etc/hosts
+127.0.0.1     $hostname.homenetwork $hostname localhost
+::1           $hostname.homenetwork $hostname localhost
+EOF
+
+cat <<EOF >> /mnt/Artemis/etc/portage/package.use/networkmanager
+net-wireless/wpa_supplicant dbus
 EOF
 
 rm /mnt/Artemis/usr/local/bin/chrooted_setup
